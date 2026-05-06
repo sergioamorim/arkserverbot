@@ -38,7 +38,7 @@ echo "Bot started..."
 while true; do
   # Get updates with long polling
   RESPONSE=$(curl -s "$API_URL/getUpdates?offset=$OFFSET&timeout=30")
-  echo "$RESPONSE" | jq -c '.result[]' | while read -r UPDATE_BLOCK; do
+  while read -r UPDATE_BLOCK; do
     UPDATE_ID=$(echo "$UPDATE_BLOCK" | jq -r '.update_id')
     OFFSET=$((UPDATE_ID + 1))
     CHAT_ID=$(echo "$UPDATE_BLOCK" | jq -r '.message.chat.id')
@@ -93,6 +93,6 @@ while true; do
         ;;
     esac
     echo "$OFFSET" > "$OFFSET_FILE"
-  done
+  done < <(echo "$RESPONSE" | jq -c '.result[]')
   sleep 1
 done
