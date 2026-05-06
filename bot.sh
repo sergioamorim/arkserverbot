@@ -103,4 +103,5 @@ while true; do
     esac
     echo "$OFFSET" > "$OFFSET_FILE"
   done
+  sleep 1
 done
