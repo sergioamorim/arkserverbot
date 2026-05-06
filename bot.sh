@@ -97,6 +97,9 @@ while true; do
           ) &
         fi
         ;;
+      *)
+        send_message "$CHAT_ID" "Unknown command. Use /on or /off."
+        ;;
     esac
     echo "$OFFSET" > "$OFFSET_FILE"
   done
