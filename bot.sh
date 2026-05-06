@@ -38,20 +38,11 @@ echo "Bot started..."
 while true; do
   # Get updates with long polling
   RESPONSE=$(curl -s "$API_URL/getUpdates?offset=$OFFSET&timeout=30")
-  
-  # Extract update_id to increment offset
-  UPDATES=$(echo "$RESPONSE" | grep -o '{"update_id":[0-9]*' | cut -d: -f2)
-  
-  for UPDATE_ID in $UPDATES; do
+  echo "$RESPONSE" | jq -c '.result[]' | while read -r UPDATE_BLOCK; do
+    UPDATE_ID=$(echo "$UPDATE_BLOCK" | jq -r '.update_id')
     OFFSET=$((UPDATE_ID + 1))
-    
-    # Extract chat_id and text for this specific update
-    # Split by {"update_id": and pick the one that matches our UPDATE_ID
-    UPDATE_BLOCK=$(echo "$RESPONSE" | sed 's/{"update_id":/\n{"update_id":/g' | grep "{\"update_id\":$UPDATE_ID")
-    
-    CHAT_ID=$(echo "$UPDATE_BLOCK" | sed -n 's/.*"chat":{"id":\([0-9]*\).*/\1/p')
-    TEXT=$(echo "$UPDATE_BLOCK" | sed -n 's/.*"text":"\([^"]*\)".*/\1/p')
-
+    CHAT_ID=$(echo "$UPDATE_BLOCK" | jq -r '.message.chat.id')
+    TEXT=$(echo "$UPDATE_BLOCK" | jq -r '.message.text // ""')
     case "$TEXT" in
       /on)
         if [ -f "on.lock" ]; then
